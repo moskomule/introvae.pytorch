@@ -1,4 +1,4 @@
-# introgan.pytorch
+# introvae.pytorch
 
 **WORK IN PROGRESS!**.
 
