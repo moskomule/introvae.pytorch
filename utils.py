@@ -16,15 +16,26 @@ def l_reg(mu, log_var):
 
 class Trainer(TrainerBase):
     def __init__(self, encoder, decoder, optimizer, callbacks, scheduler, hp, verb=False):
+        """
+        :param encoder: Encoder model
+        :param decoder: Decoder Model
+        :param optimizer: tuple of optimizers (Opt_enc, Opt_dec)
+        :param callbacks:
+        :param scheduler:
+        :param hp: dict of Hyper parameters
+        :param verb:
+        """
+        assert isinstance(optimizer, torch.optim.Optimizer), "Need two optimizers for encoder and generator"
+        assert set(hp.keys()) <= set(["alpha", "beta", "margin"]), "Need `alpha`, `beta`, `margin`"
         super(Trainer, self).__init__(model=nn.ModuleList([encoder, decoder]), optimizer=optimizer, loss_f=None,
                                       callbacks=callbacks, scheduler=scheduler, verb=verb, hp=hp)
         self.encoder = self.model[0]
         self.decoder = self.model[1]
 
     def iteration(self, data, is_train):
-        alpha = self.hp.alpha
-        beta = self.hp.beta
-        margin = self.hp.margin
+        alpha = self.hp["alpha"]
+        beta = self.hp["beta"]
+        margin = self.hp["margin"]
 
         input, _ = self.to_device(data)
         if is_train:
@@ -51,5 +62,7 @@ class Trainer(TrainerBase):
     def test(self, data_loader, name=None):
         pass
 
-    def generate(self):
-        pass
+    def generate(self, num_sample):
+        self.model.eval()
+        return self.decoder(torch.randn(num_sample))
+
